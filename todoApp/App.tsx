@@ -9,15 +9,37 @@ import {
 } from 'react-native';
 import ListTask from './components/ListTask';
 
+interface Task {
+  id: number;
+  task: string;
+  completed: boolean;
+}
+
 function App() {
   const [task, setTask] = useState('');
-  const [tasksList, setTasksList] = useState<String[]>([]);
+  const [tasksList, setTasksList] = useState<Task[]>([]);
 
   const handleAddTask = () => {
     if (task.trim() === '') return;
 
-    setTasksList([...tasksList, task]);
+    setTasksList([
+      ...tasksList,
+      {task, id: new Date().getTime(), completed: false},
+    ]);
     setTask('');
+  };
+
+  const handleDeleteTask = (id: number) => {
+    const updatedTasks = tasksList.filter(item => item.id !== id);
+    setTasksList(updatedTasks);
+  };
+
+  const handleCheckTask = (id: number) => {
+    const updatedTasks = tasksList.map(item =>
+      item.id === id ? {...item, completed: !item.completed} : item,
+    );
+
+    setTasksList(updatedTasks);
   };
 
   return (
@@ -39,7 +61,13 @@ function App() {
         data={tasksList}
         keyExtractor={(_, index) => index.toString()}
         showsVerticalScrollIndicator={false}
-        renderItem={({item}) => <ListTask item={item} />}
+        renderItem={({item}) => (
+          <ListTask
+            item={item}
+            handleDeleteTask={handleDeleteTask}
+            handleCheckTask={handleCheckTask}
+          />
+        )}
       />
     </View>
   );
